@@ -19,6 +19,7 @@ y1 = 0
 dif = 500 / 9
 flagPress1 = 0
 flagPress2 = 0
+flag_started = False
 
 grid = grid.create_grid()
 
@@ -59,14 +60,14 @@ def get_cord_second_click(pos):
 
 
 # Highlight the cell selected
-def highlight_cell():
+def highlight_cells():
     # draw red lines vert/hor to highlight the cell
-
-    for i in range(2):
-        pygame.draw.line(screen, RED, (x * dif - 3, (y + i) * dif), (x * dif + dif + 3, (y + i) * dif), 7)
-        pygame.draw.line(screen, RED, ((x + i) * dif, y * dif), ((x + i) * dif, y * dif + dif), 7)
-        pygame.draw.line(screen, RED, (x1 * dif - 3, (y1 + i) * dif), (x1 * dif + dif + 3, (y1 + i) * dif), 7)
-        pygame.draw.line(screen, RED, ((x1 + i) * dif, y1 * dif), ((x1 + i) * dif, y1 * dif + dif), 7)
+    if(flag_started):
+        for i in range(2):
+            pygame.draw.line(screen, RED, (x * dif - 3, (y + i) * dif), (x * dif + dif + 3, (y + i) * dif), 7)
+            pygame.draw.line(screen, RED, ((x + i) * dif, y * dif), ((x + i) * dif, y * dif + dif), 7)
+            pygame.draw.line(screen, RED, (x1 * dif - 3, (y1 + i) * dif), (x1 * dif + dif + 3, (y1 + i) * dif), 7)
+            pygame.draw.line(screen, RED, ((x1 + i) * dif, y1 * dif), ((x1 + i) * dif, y1 * dif + dif), 7)
 
 
 def draw():
@@ -111,7 +112,7 @@ while run:
             run = False
 
         if event.type == pygame.MOUSEBUTTONDOWN:
-
+            flag_started = True
             pos = pygame.mouse.get_pos()
 
             # setPressed
@@ -141,7 +142,7 @@ while run:
 
     draw()
     instruction()
-    highlight_cell()
+    highlight_cells()
     # Update window
     pygame.display.update()
 
