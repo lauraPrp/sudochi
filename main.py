@@ -1,11 +1,14 @@
 import pygame
 import math
+
+from pygame.transform import scale
+
 import grid
 from Cell import Cell
 
 pygame.font.init()
 screen = pygame.display.set_mode((500, 600))
-pygame.display.set_caption("SUDOKI?")
+pygame.display.set_caption("SUDO(A)KI?")
 # img = pygame.image.load('icon.png')
 # pygame.display.set_icon(img)
 x = 0
@@ -33,7 +36,7 @@ def get_cord_first_click(pos):
     x = pos[0] // dif
     y = pos[1] // dif
     # position
-    print("first press " + str(math.floor(x)), str(math.floor(y)))
+    print("DEBUG first press " + str(math.floor(x)), str(math.floor(y)))
     # values
     cell = grid[math.floor(x)][math.floor(y)]
     print(cell.value)
@@ -47,10 +50,10 @@ def get_cord_second_click(pos):
     x1 = pos[0] // dif
     y1 = pos[1] // dif
     # position
-    print("2 press " + str(math.floor(x1)), str(math.floor(y1)))
+    print("DEBUG 2 press " + str(math.floor(x1)), str(math.floor(y1)))
     # values
     cell = grid[math.floor(x1)][math.floor(y1)]
-    print(cell.value)
+    print("DEBUG" + str(cell.value))
 
     return cell
 
@@ -89,6 +92,8 @@ def instruction():
     text1 = font2.render("(SHOULD) MATCH ADJACENTS EQUALS NUMBERS AND THOSE WHOSE SUM IS 10", 1, BLACK)
     screen.blit(text1, (20, 520))
 
+def is_near():
+    print("not fully implemented yet")
 
 run = True
 
@@ -113,36 +118,26 @@ while run:
             if flagPress1 == 0:
                 flagPress1 = 1
 
-                cell = get_cord_first_click(pos)
-                #cell.is_selected = True
-                grid[cell.x_coord][cell.y_coord] = cell
-                pos1 = pos
+                first_cell = get_cord_first_click(pos)
+                #first_cell.is_selected = True
+                grid[first_cell.x_coord][first_cell.y_coord] = first_cell
 
             elif flagPress1 == 1 and flagPress2 == 0:
                 flagPress2 = 1
-                pos2 = pos
-                cell = get_cord_second_click(pos)
-                #cell.is_selected = True
-                grid[cell.x_coord][cell.y_coord] = cell
-            elif flagPress1 == 1 and flagPress2 == 1:
-                # evaluate
 
-                pos1 = pos2
-                pos2 = pos
-                cell1 = get_cord_first_click(pos1)
-                cell2 = get_cord_second_click(pos)
-                #cell1.is_selected = True
-                #cell2.is_selected = True
-                grid[cell1.x_coord][cell1.y_coord] = cell1
-                grid[cell2.x_coord][cell2.y_coord] = cell2
-                print("reset " + str(cell1.value) + str(cell2.value))
+                scd_cell = get_cord_second_click(pos)
+                #cell.is_selected = True
+                grid[scd_cell.x_coord][scd_cell.y_coord] = scd_cell
+
+
+                print("DEBUG reset " + str(first_cell.value) + str(scd_cell.value))
                 flagPress1 = 0
                 flagPress2 = 0
-                if cell1.value == cell2.value:
+                if first_cell.value == scd_cell.value:
                     # check if valid
-                    print("SAME")
-                    cell1.value = 0;
-                    cell2.value = 0;
+                    print("DEBUG SAME")
+                    first_cell.value = 0;
+                    scd_cell.value = 0;
 
     draw()
     instruction()
