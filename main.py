@@ -60,10 +60,10 @@ def highlight_cell():
     # draw red lines vert/hor to highlight the cell
 
     for i in range(2):
-        pygame.draw.line(screen, (RED), (x * dif - 3, (y + i) * dif), (x * dif + dif + 3, (y + i) * dif), 7)
-        pygame.draw.line(screen, (RED), ((x + i) * dif, y * dif), ((x + i) * dif, y * dif + dif), 7)
-        pygame.draw.line(screen, (RED), (x1 * dif - 3, (y1 + i) * dif), (x1 * dif + dif + 3, (y1 + i) * dif), 7)
-        pygame.draw.line(screen, (RED), ((x1 + i) * dif, y1 * dif), ((x1 + i) * dif, y1 * dif + dif), 7)
+        pygame.draw.line(screen, RED, (x * dif - 3, (y + i) * dif), (x * dif + dif + 3, (y + i) * dif), 7)
+        pygame.draw.line(screen, RED, ((x + i) * dif, y * dif), ((x + i) * dif, y * dif + dif), 7)
+        pygame.draw.line(screen, RED, (x1 * dif - 3, (y1 + i) * dif), (x1 * dif + dif + 3, (y1 + i) * dif), 7)
+        pygame.draw.line(screen, RED, ((x1 + i) * dif, y1 * dif), ((x1 + i) * dif, y1 * dif + dif), 7)
 
 
 def draw():
@@ -79,14 +79,14 @@ def draw():
     for i in range(10):
         thick = 1
         # horiz
-        pygame.draw.line(screen, (BLACK), (0, i * dif), (500, i * dif), thick)
+        pygame.draw.line(screen, BLACK, (0, i * dif), (500, i * dif), thick)
         # vertical
-        pygame.draw.line(screen, (BLACK), (i * dif, 0), (i * dif, 500), thick)
+        pygame.draw.line(screen, BLACK, (i * dif, 0), (i * dif, 500), thick)
 
 
 # Display instruction for the game
 def instruction():
-    text1 = font2.render("(SHOULD) MATCH ADJACENTS EQUALS NUMBERS AND THOSE WHOSE SUM IS 10", 1, (BLACK))
+    text1 = font2.render("(SHOULD) MATCH ADJACENTS EQUALS NUMBERS AND THOSE WHOSE SUM IS 10", 1, BLACK)
     screen.blit(text1, (20, 520))
 
 
