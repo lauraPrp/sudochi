@@ -101,37 +101,29 @@ def instruction():
 
 
 def is_near(initial_cell, landing_cell):
-    # bishop like move
+    near = False
+    # diagonal bishop like move
     dx = abs(initial_cell.x_coord - landing_cell.x_coord)
     dy = abs(initial_cell.y_coord - landing_cell.y_coord)
-    if abs(initial_cell.x_coord - landing_cell.x_coord == 1) and (initial_cell.y_coord - landing_cell.y_coord == 0):
-        return True
-    elif abs(landing_cell.x_coord - initial_cell.x_coord == 1) and (initial_cell.y_coord - landing_cell.y_coord == 0):
-        return True
-    elif abs(initial_cell.y_coord - landing_cell.y_coord == 1) and (initial_cell.x_coord - landing_cell.x_coord == 0):
-        return True
-    elif abs(landing_cell.y_coord - initial_cell.y_coord == 1) and (initial_cell.x_coord - landing_cell.x_coord == 0):
-        return True
-    elif (dx == dy) and (dx > 0):
-
-        return True
-    else:
-        print("not legal move")
-        return False
+    if (dx == dy) and (dx > 0):
+        near = True
+    elif initial_cell.y_coord - landing_cell.y_coord == 0:
+        if abs(initial_cell.x_coord - landing_cell.x_coord) == 1 :
+            near = True
+    elif initial_cell.x_coord - landing_cell.x_coord == 0:
+        if abs(initial_cell.y_coord - landing_cell.y_coord) == 1:
+            near = True
+    return near
 
 
 run = True
 
 # The loop that keeps the window running
 while run:
-    # pos1 = 0, 0
-    # pos2 = 0, 0
-    # White color background
     screen.fill(WHITE)
 
-    # Loop through the events stored in event.get()
     for event in pygame.event.get():
-        # Quit the game window
+
         if event.type == pygame.QUIT:
             run = False
 
@@ -139,13 +131,12 @@ while run:
 
             pos = pygame.mouse.get_pos()
 
-            # setPressed
+            # setPressed FAULTY LOGIC MISS THE 3RD CLICK
             if flagPress1 == 0:
                 flagPress1 = 1
                 flag1_started = True
 
                 first_cell = get_cord_first_click(pos)
-                # first_cell.is_selected = True
                 grid[first_cell.x_coord][first_cell.y_coord] = first_cell
 
             elif flagPress1 == 1 and flagPress2 == 0:
@@ -163,7 +154,7 @@ while run:
                 if (first_cell.value == scd_cell.value) or (first_cell.value + scd_cell.value == 10):
                     # check if valid
                     print("DEBUG SAME")
-                    if (is_near(first_cell, scd_cell)):
+                    if is_near(first_cell, scd_cell):
                         first_cell.value = 0
                         scd_cell.value = 0
                     # disable cells
