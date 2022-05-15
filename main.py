@@ -1,100 +1,224 @@
+from random import randint
 
 import pygame
-import random
 import math
+
 import grid
+from Cell import Cell
 
 pygame.font.init()
 screen = pygame.display.set_mode((500, 600))
-pygame.display.set_caption("SUDOKI?")
+pygame.display.set_caption("SUDO(A)KI?")
 # img = pygame.image.load('icon.png')
 # pygame.display.set_icon(img)
 x = 0
 y = 0
+x1 = 0
+y1 = 0
+
 dif = 500 / 9
-val = 0
+flagPress1 = 0
+flagPress2 = 0
+flag1_started = False
+flag2_started = False
 
 grid = grid.create_grid()
-
 # Load test fonts for future use
 font1 = pygame.font.SysFont("verdana", 30)
 font2 = pygame.font.SysFont("verdana", 10)
+WHITE = 255, 255, 255
+RED = 255, 0, 0
+BLACK = 0, 0, 0
 
 
-def get_cord(pos):
+def get_cord_first_click(pos):
     global x
-    x = pos[0] // dif
     global y
+    x = pos[0] // dif
     y = pos[1] // dif
     # position
-    print(math.floor(x), math.floor(y))
+    # print("DEBUG first press " + str(math.floor(x)), str(math.floor(y)))
     # values
-    print(grid[math.floor(x)][math.floor(y)])
+    cell = grid[math.floor(x)][math.floor(y)]
+    # print(cell.value)
+
+    return cell
+
+
+def get_cord_second_click(pos):
+    global x1
+    global y1
+    x1 = pos[0] // dif
+    y1 = pos[1] // dif
+    # position
+    # print("DEBUG 2 press " + str(math.floor(x1)), str(math.floor(y1)))
+    # values
+    cell = grid[math.floor(x1)][math.floor(y1)]
+    # print("DEBUG" + str(cell.value))
+
+    return cell
 
 
 # Highlight the cell selected
-def highlight_cell():
-    for i in range(2):
-        pygame.draw.line(screen, (255, 0, 0), (x * dif - 3, (y + i) * dif), (x * dif + dif + 3, (y + i) * dif), 7)
-        pygame.draw.line(screen, (255, 0, 0), ((x + i) * dif, y * dif), ((x + i) * dif, y * dif + dif), 7)
+def highlight_cells():
+    # draw red lines vert/hor to highlight the cell
+    if flag1_started:
+        for i in range(2):
+            pygame.draw.line(screen, RED, (x * dif - 3, (y + i) * dif), (x * dif + dif + 3, (y + i) * dif), 7)
+            pygame.draw.line(screen, RED, ((x + i) * dif, y * dif), ((x + i) * dif, y * dif + dif), 7)
+            if flag2_started:
+                pygame.draw.line(screen, RED, (x1 * dif - 3, (y1 + i) * dif), (x1 * dif + dif + 3, (y1 + i) * dif), 7)
+                pygame.draw.line(screen, RED, ((x1 + i) * dif, y1 * dif), ((x1 + i) * dif, y1 * dif + dif), 7)
 
 
 def draw():
     # Draw the lines on the board
     for i in range(9):
         for j in range(9):
-            if grid[i][j] != 0:
+            cell = grid[i][j]
+            if cell.value == 0:
                 # Fill blue color in already numbered grid
-                # pygame.draw.rect(screen, (0, 153, 153), (i * dif, j * dif, dif + 1, dif + 1))
+                pygame.draw.rect(screen, WHITE, (i * dif, j * dif, dif + 1, dif + 1))
 
-                # Fill grid with default numbers specified
-                text1 = font1.render(str(grid[i][j]), 1, (0, 0, 0))
+            else:
+                pygame.draw.rect(screen, WHITE, (i * dif, j * dif, dif + 1, dif + 1))
+                text1 = font1.render(str(cell.value), 1, BLACK)
                 screen.blit(text1, (i * dif + 10, j * dif + 10))
-    # Draw lines to form grid
+                # Draw lines to form grid
     for i in range(10):
         thick = 1
         # horiz
-        pygame.draw.line(screen, (0, 0, 0), (0, i * dif), (500, i * dif), thick)
+        pygame.draw.line(screen, BLACK, (0, i * dif), (500, i * dif), thick)
         # vertical
-        pygame.draw.line(screen, (0, 0, 0), (i * dif, 0), (i * dif, 500), thick)
-
-
-# Fill value entered in cell
-def draw_val(val):
-    text1 = font1.render(str(val), 1, (0, 0, 0))
-    screen.blit(text1, (x * dif + 15, y * dif + 15))
+        pygame.draw.line(screen, BLACK, (i * dif, 0), (i * dif, 500), thick)
 
 
 # Display instruction for the game
 def instruction():
-    text1 = font2.render("MATCH ADIACENTS EQUALS NUMBERS AND THOSE WHOSE SUM IS 10", 1, (0, 0, 0))
+    text1 = font2.render("(SHOULD) MATCH ADJACENTS EQUALS NUMBERS AND THOSE WHOSE SUM IS 10", 1, BLACK)
     screen.blit(text1, (20, 520))
+
+
+def is_near(initial_cell, landing_cell):
+    near = False
+
+    if initial_cell.y_coord - landing_cell.y_coord == 0:
+        if abs(initial_cell.x_coord - landing_cell.x_coord) == 1:
+            near = True
+    elif initial_cell.x_coord - landing_cell.x_coord == 0:
+        if abs(initial_cell.y_coord - landing_cell.y_coord) == 1:
+            near = True
+    return near
+
+
+def diagonal(x_frst, y_frst, x_scnd, y_scnd):
+    diag = []
+    diff_x = abs(x_frst - x_scnd)
+    diff_y = abs(y_frst - y_scnd)
+    if diff_x != diff_y:
+        print("ERROR this is not a diagonal")
+
+    else:
+        diagonal_gap = diff_y
+        print("diagonal gap:    " + str(diagonal_gap))
+        print(" x_frst, y_frst   " + str(x_frst) + "," + str(y_frst))
+        print(" x_scnd, y_scnd   " + str(x_scnd) + "," + str(y_scnd))
+
+        for i in range(1, diagonal_gap, 1):
+            if x_frst < x_scnd and y_frst < y_scnd:
+                cell = grid[x_frst + i][y_frst + i]
+                print("cell val1:")
+                print(cell.value)
+            elif x_frst < x_scnd and y_frst > y_scnd:
+                cell = grid[x_frst + i][y_frst - i]
+                print("cell val2:")
+                print(cell.value)
+            elif x_frst > x_scnd and y_frst < y_scnd:
+                cell = grid[x_frst - i][y_frst + i]
+                print("cell val3:")
+                print(cell.value)
+            elif x_frst > x_scnd and y_frst > y_scnd:
+                cell = grid[x_frst - i][y_frst - i]
+                print("cell val4:")
+                print(cell.value)
+            else:
+                cell.value = 0
+
+            if cell.value != 0:
+                diag.append(cell.value)
+
+
+    return diag
+
+
+'''
+    # Given the initial position x,y follow the diagonal down and
+    # to the right, and down left until x_pos,y_pos .
+    diag = []
+    while x_pos < x and y_pos < y:
+        diag.append(grid[y_pos][x_pos])
+        x_pos += 1
+        y_pos += 1
+    while x < x_pos and y < y_pos:
+        diag.append(grid[y_pos][x_pos])
+        x += 1
+        y += 1
+    return diag
+'''
+
+
+# checks cells far from each other having just empty cells in between
+def is_valid(initial_cell, landing_cell):
+    if len(diagonal(initial_cell.x_coord, initial_cell.y_coord, landing_cell.x_coord, landing_cell.y_coord)) <= 0:
+        return True
+    else:
+        return False
 
 
 run = True
 
-# The loop thats keep the window running
+# The loop that keeps the window running
 while run:
+    screen.fill(WHITE)
 
-    # White color background
-    screen.fill((255, 255, 255))
-    # Loop through the events stored in event.get()
     for event in pygame.event.get():
-        # Quit the game window
+
         if event.type == pygame.QUIT:
             run = False
-            # Get the mouse position to insert number
+
         if event.type == pygame.MOUSEBUTTONDOWN:
-            flag1 = 1
+
             pos = pygame.mouse.get_pos()
-            get_cord(pos)
-        # Get the number to be inserted if key pressed
 
+            # setPressed FAULTY LOGIC MISS THE 3RD CLICK
+            if flagPress1 == 0:
+                flagPress1 = 1
+                flag1_started = True
+
+                first_cell = get_cord_first_click(pos)
+                grid[first_cell.x_coord][first_cell.y_coord] = first_cell
+
+            elif flagPress1 == 1 and flagPress2 == 0:
+                flagPress2 = 1
+
+                scd_cell = get_cord_second_click(pos)
+                flag2_started = True
+                grid[scd_cell.x_coord][scd_cell.y_coord] = scd_cell
+
+                # bug 3rd click
+
+                if (first_cell.value == scd_cell.value) or (first_cell.value + scd_cell.value == 10):
+                    # check if close
+                    if is_near(first_cell, scd_cell) or is_valid(first_cell, scd_cell):
+                        first_cell.value = 0
+                        scd_cell.value = 0
+
+                        # disable cells
+                        flagPress1 = 0
+                        flagPress2 = 0
     draw()
-
-    highlight_cell()
     instruction()
-
+    highlight_cells()
     # Update window
     pygame.display.update()
 
