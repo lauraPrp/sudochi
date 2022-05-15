@@ -99,16 +99,18 @@ def instruction():
     screen.blit(text1, (20, 520))
 
 
-def is_near(initial_cell, landing_cell):
-    near = False
+def is_next(initial_cell, landing_cell):
+    isnext = False
 
     if initial_cell.y_coord - landing_cell.y_coord == 0:
         if abs(initial_cell.x_coord - landing_cell.x_coord) == 1:
-            near = True
+            print(initial_cell.x_coord - landing_cell.x_coord)
+            isnext = True
     elif initial_cell.x_coord - landing_cell.x_coord == 0:
         if abs(initial_cell.y_coord - landing_cell.y_coord) == 1:
-            near = True
-    return near
+            print(initial_cell.y_coord - landing_cell.y_coord)
+            isnext = True
+    return isnext
 
 
 def diagonal(x_frst, y_frst, x_scnd, y_scnd):
@@ -117,6 +119,9 @@ def diagonal(x_frst, y_frst, x_scnd, y_scnd):
     diff_y = abs(y_frst - y_scnd)
     if diff_x != diff_y:
         print("ERROR this is not a diagonal")
+        flag1_started = False
+        flag2_started = False
+        diag.append("X")
 
     else:
         diagonal_gap = diff_y
@@ -147,29 +152,12 @@ def diagonal(x_frst, y_frst, x_scnd, y_scnd):
             if cell.value != 0:
                 diag.append(cell.value)
 
-
     return diag
-
-
-'''
-    # Given the initial position x,y follow the diagonal down and
-    # to the right, and down left until x_pos,y_pos .
-    diag = []
-    while x_pos < x and y_pos < y:
-        diag.append(grid[y_pos][x_pos])
-        x_pos += 1
-        y_pos += 1
-    while x < x_pos and y < y_pos:
-        diag.append(grid[y_pos][x_pos])
-        x += 1
-        y += 1
-    return diag
-'''
 
 
 # checks cells far from each other having just empty cells in between
 def is_valid(initial_cell, landing_cell):
-    if len(diagonal(initial_cell.x_coord, initial_cell.y_coord, landing_cell.x_coord, landing_cell.y_coord)) <= 0:
+    if len(diagonal(initial_cell.x_coord, initial_cell.y_coord, landing_cell.x_coord, landing_cell.y_coord)) == 0:
         return True
     else:
         return False
@@ -208,14 +196,15 @@ while run:
                 # bug 3rd click
 
                 if (first_cell.value == scd_cell.value) or (first_cell.value + scd_cell.value == 10):
-                    # check if close
-                    if is_near(first_cell, scd_cell) or is_valid(first_cell, scd_cell):
+                    # check if close and valid
+                    if is_next(first_cell, scd_cell) or is_valid(first_cell, scd_cell):
                         first_cell.value = 0
                         scd_cell.value = 0
 
-                        # disable cells
-                        flagPress1 = 0
-                        flagPress2 = 0
+                        # reset clicks
+                flagPress1 = 0
+                flagPress2 = 0
+
     draw()
     instruction()
     highlight_cells()
