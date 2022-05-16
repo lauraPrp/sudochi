@@ -99,6 +99,43 @@ def instruction():
     screen.blit(text1, (20, 520))
 
 
+def diagonal(x_frst, y_frst, x_scnd, y_scnd):
+    diag = []
+
+    if abs(x_frst - x_scnd) != abs(y_frst - y_scnd):
+        print("ERROR this is not a diagonal")
+        flag1_started = False
+        flag2_started = False
+        diag.append("X")
+
+    else:
+
+        print("diagonal gap:    " + str(abs(y_frst - y_scnd)))
+        print(" x_frst, y_frst   " + str(x_frst) + "," + str(y_frst))
+        print(" x_scnd, y_scnd   " + str(x_scnd) + "," + str(y_scnd))
+
+        for i in range(1, abs(y_frst - y_scnd), 1):
+            if x_frst < x_scnd and y_frst < y_scnd:
+                cell = grid[x_frst + i][y_frst + i]
+                print(cell.value)
+            elif x_frst < x_scnd and y_frst > y_scnd:
+                cell = grid[x_frst + i][y_frst - i]
+                print(cell.value)
+            elif x_frst > x_scnd and y_frst < y_scnd:
+                cell = grid[x_frst - i][y_frst + i]
+                print(cell.value)
+            elif x_frst > x_scnd and y_frst > y_scnd:
+                cell = grid[x_frst - i][y_frst - i]
+                print(cell.value)
+            else:
+                cell.value = 0
+
+            if cell.value != 0:
+                diag.append(cell.value)
+
+    return diag
+
+
 def is_next(initial_cell, landing_cell):
     isnext = False
 
@@ -111,48 +148,6 @@ def is_next(initial_cell, landing_cell):
             print(initial_cell.y_coord - landing_cell.y_coord)
             isnext = True
     return isnext
-
-
-def diagonal(x_frst, y_frst, x_scnd, y_scnd):
-    diag = []
-    diff_x = abs(x_frst - x_scnd)
-    diff_y = abs(y_frst - y_scnd)
-    if diff_x != diff_y:
-        print("ERROR this is not a diagonal")
-        flag1_started = False
-        flag2_started = False
-        diag.append("X")
-
-    else:
-        diagonal_gap = diff_y
-        print("diagonal gap:    " + str(diagonal_gap))
-        print(" x_frst, y_frst   " + str(x_frst) + "," + str(y_frst))
-        print(" x_scnd, y_scnd   " + str(x_scnd) + "," + str(y_scnd))
-
-        for i in range(1, diagonal_gap, 1):
-            if x_frst < x_scnd and y_frst < y_scnd:
-                cell = grid[x_frst + i][y_frst + i]
-                print("cell val1:")
-                print(cell.value)
-            elif x_frst < x_scnd and y_frst > y_scnd:
-                cell = grid[x_frst + i][y_frst - i]
-                print("cell val2:")
-                print(cell.value)
-            elif x_frst > x_scnd and y_frst < y_scnd:
-                cell = grid[x_frst - i][y_frst + i]
-                print("cell val3:")
-                print(cell.value)
-            elif x_frst > x_scnd and y_frst > y_scnd:
-                cell = grid[x_frst - i][y_frst - i]
-                print("cell val4:")
-                print(cell.value)
-            else:
-                cell.value = 0
-
-            if cell.value != 0:
-                diag.append(cell.value)
-
-    return diag
 
 
 # checks cells far from each other having just empty cells in between
