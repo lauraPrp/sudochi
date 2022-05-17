@@ -1,13 +1,10 @@
 import queue
 import sys
-import traceback
-from random import randint
 
 import pygame
 import math
 
 import grid
-from Cell import Cell
 
 pygame.font.init()
 screen = pygame.display.set_mode((500, 600))
@@ -179,43 +176,36 @@ while run:
                     grid[first_cell.x_coord][first_cell.y_coord] = first_cell
 
                     flag1_started = True
-                elif clickQueue.qsize() == 1:
-                    print("DUIIIIIIIIIIII ELEMENTO")
-                    scd_cell = get_cord_second_click(math.floor(pos[0] // dif), math.floor(pos[1] // dif))
-                    clickQueue.put(scd_cell)
-                    grid[first_cell.x_coord][first_cell.y_coord] = first_cell
-                    grid[scd_cell.x_coord][scd_cell.y_coord] = scd_cell
-                    flag2_started = True
+                else:
+                    if clickQueue.qsize() == 1:
 
-                elif clickQueue.qsize() > 1:
-                    print("ELIMINA ELEMENTO")
-                    clickQueue.get()
-                    posCell = [scd_cell.x_coord, scd_cell.y_coord]
+                        scd_cell = get_cord_second_click(math.floor(pos[0] // dif), math.floor(pos[1] // dif))
+                        clickQueue.put(scd_cell)
+                        grid[first_cell.x_coord][first_cell.y_coord] = first_cell
+                        grid[scd_cell.x_coord][scd_cell.y_coord] = scd_cell
+                        flag2_started = True
 
-                    first_cell = get_cord_first_click(scd_cell.x_coord, scd_cell.y_coord)
-                    scd_cell = get_cord_second_click(math.floor(pos[0] // dif), math.floor(pos[1] // dif))
-                    clickQueue.put(scd_cell)
+                    elif clickQueue.qsize() > 1:
 
-                    flag1_started = True
-                    flag2_started = True
+                        clickQueue.get()
+                        posCell = [scd_cell.x_coord, scd_cell.y_coord]
+
+                        first_cell = get_cord_first_click(scd_cell.x_coord, scd_cell.y_coord)
+                        scd_cell = get_cord_second_click(math.floor(pos[0] // dif), math.floor(pos[1] // dif))
+                        clickQueue.put(scd_cell)
+
+                        flag1_started = True
+                        flag2_started = True
 
                     if score(first_cell, scd_cell) and is_valid(first_cell, scd_cell):
-                        print("SCORE")
+
                         # check if close and valid
                         first_cell.value = 0
                         scd_cell.value = 0
                         flagPress1 = 1
                         flagPress2 = 0
-                    '''else:
-                        # reset clicks
-                        first_cell = scd_cell
-                        flagPress1 = 1
-                        flagPress2 = 0
-                        flag1_started = True
-                        flag2_started = False
-                        clickQueue.get()'''
-                else:
-                    print("dsdfsfdsdfsfsdfds")
+                    else:
+                        print("NO SCORE")
 
             else:
                 print("TBI SOON: HINT/SCORE")
