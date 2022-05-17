@@ -54,7 +54,7 @@ def get_cord_second_click(pos):
     # print("DEBUG 2 press " + str(math.floor(x1)), str(math.floor(y1)))
     # values
     cell = grid[math.floor(x1)][math.floor(y1)]
-    # print("DEBUG" + str(cell.value))
+    # #print("DEBUG" + str(cell.value))
 
     return cell
 
@@ -99,53 +99,34 @@ def instruction():
     screen.blit(text1, (20, 520))
 
 
-def is_next(initial_cell, landing_cell):
-    isnext = False
-
-    if initial_cell.y_coord - landing_cell.y_coord == 0:
-        if abs(initial_cell.x_coord - landing_cell.x_coord) == 1:
-            print(initial_cell.x_coord - landing_cell.x_coord)
-            isnext = True
-    elif initial_cell.x_coord - landing_cell.x_coord == 0:
-        if abs(initial_cell.y_coord - landing_cell.y_coord) == 1:
-            print(initial_cell.y_coord - landing_cell.y_coord)
-            isnext = True
-    return isnext
-
-
 def diagonal(x_frst, y_frst, x_scnd, y_scnd):
     diag = []
-    diff_x = abs(x_frst - x_scnd)
-    diff_y = abs(y_frst - y_scnd)
-    if diff_x != diff_y:
+
+    if abs(x_frst - x_scnd) != abs(y_frst - y_scnd):
         print("ERROR this is not a diagonal")
         flag1_started = False
         flag2_started = False
         diag.append("X")
 
     else:
-        diagonal_gap = diff_y
-        print("diagonal gap:    " + str(diagonal_gap))
-        print(" x_frst, y_frst   " + str(x_frst) + "," + str(y_frst))
-        print(" x_scnd, y_scnd   " + str(x_scnd) + "," + str(y_scnd))
 
-        for i in range(1, diagonal_gap, 1):
+        # print("DEBUG diagonal gap:    " + str(abs(y_frst - y_scnd)))
+        # print("DEBUG x_frst, y_frst   " + str(x_frst) + "," + str(y_frst))
+        # print("DEBUG x_scnd, y_scnd   " + str(x_scnd) + "," + str(y_scnd))
+
+        for i in range(1, abs(y_frst - y_scnd), 1):
             if x_frst < x_scnd and y_frst < y_scnd:
                 cell = grid[x_frst + i][y_frst + i]
-                print("cell val1:")
-                print(cell.value)
+
             elif x_frst < x_scnd and y_frst > y_scnd:
                 cell = grid[x_frst + i][y_frst - i]
-                print("cell val2:")
-                print(cell.value)
+
             elif x_frst > x_scnd and y_frst < y_scnd:
                 cell = grid[x_frst - i][y_frst + i]
-                print("cell val3:")
-                print(cell.value)
+
             elif x_frst > x_scnd and y_frst > y_scnd:
                 cell = grid[x_frst - i][y_frst - i]
-                print("cell val4:")
-                print(cell.value)
+
             else:
                 cell.value = 0
 
@@ -155,12 +136,24 @@ def diagonal(x_frst, y_frst, x_scnd, y_scnd):
     return diag
 
 
-# checks cells far from each other having just empty cells in between
 def is_valid(initial_cell, landing_cell):
-    if len(diagonal(initial_cell.x_coord, initial_cell.y_coord, landing_cell.x_coord, landing_cell.y_coord)) == 0:
-        return True
+    valid = False
+    # checks proximity
+    if initial_cell.y_coord - landing_cell.y_coord == 0:
+        if abs(initial_cell.x_coord - landing_cell.x_coord) == 1:
+            # print("DEBUG)
+            #print(initial_cell.x_coord - landing_cell.x_coord)
+            valid = True
+    elif initial_cell.x_coord - landing_cell.x_coord == 0:
+        if abs(initial_cell.y_coord - landing_cell.y_coord) == 1:
+            # print("DEBUG)
+            # print(initial_cell.y_coord - landing_cell.y_coord)
+            valid = True
     else:
-        return False
+        # checks cells far from each other having just empty cells in between
+        if len(diagonal(initial_cell.x_coord, initial_cell.y_coord, landing_cell.x_coord, landing_cell.y_coord)) == 0:
+            valid = True
+    return valid
 
 
 run = True
@@ -177,34 +170,35 @@ while run:
         if event.type == pygame.MOUSEBUTTONDOWN:
 
             pos = pygame.mouse.get_pos()
+            if pos[1] < 500:
+                # setPressed FAULTY LOGIC MISS THE 3RD CLICK
+                if flagPress1 == 0:
+                    flagPress1 = 1
+                    flag1_started = True
 
-            # setPressed FAULTY LOGIC MISS THE 3RD CLICK
-            if flagPress1 == 0:
-                flagPress1 = 1
-                flag1_started = True
+                    first_cell = get_cord_first_click(pos)
+                    grid[first_cell.x_coord][first_cell.y_coord] = first_cell
 
-                first_cell = get_cord_first_click(pos)
-                grid[first_cell.x_coord][first_cell.y_coord] = first_cell
+                elif flagPress1 == 1 and flagPress2 == 0:
+                    flagPress2 = 1
 
-            elif flagPress1 == 1 and flagPress2 == 0:
-                flagPress2 = 1
+                    scd_cell = get_cord_second_click(pos)
+                    flag2_started = True
+                    grid[scd_cell.x_coord][scd_cell.y_coord] = scd_cell
 
-                scd_cell = get_cord_second_click(pos)
-                flag2_started = True
-                grid[scd_cell.x_coord][scd_cell.y_coord] = scd_cell
+                    # bug 3rd click
 
-                # bug 3rd click
+                    if (first_cell.value == scd_cell.value) or (first_cell.value + scd_cell.value == 10):
+                        # check if close and valid
+                        if is_valid(first_cell, scd_cell):
+                            first_cell.value = 0
+                            scd_cell.value = 0
 
-                if (first_cell.value == scd_cell.value) or (first_cell.value + scd_cell.value == 10):
-                    # check if close and valid
-                    if is_next(first_cell, scd_cell) or is_valid(first_cell, scd_cell):
-                        first_cell.value = 0
-                        scd_cell.value = 0
-
-                        # reset clicks
-                flagPress1 = 0
-                flagPress2 = 0
-
+                            # reset clicks
+                    flagPress1 = 0
+                    flagPress2 = 0
+            else:
+                print("TBI SOON: HINT/SCORE")
     draw()
     instruction()
     highlight_cells()
