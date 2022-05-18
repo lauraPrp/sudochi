@@ -25,6 +25,8 @@ WHITE = 255, 255, 255
 RED = 255, 0, 0
 BLACK = 0, 0, 0
 
+score_points = 0
+
 
 def get_cord_first_click(xx, yy):
     global x, y
@@ -88,7 +90,10 @@ def draw():
 # Display instruction for the game
 def instruction():
     text1 = font2.render("(SHOULD) MATCH ADJACENTS EQUALS NUMBERS AND THOSE WHOSE SUM IS 10", 1, BLACK)
+    score_text = font1.render(str(score_points), 1, RED)
     screen.blit(text1, (20, 520))
+    screen.blit(score_text, (250, 560))
+    # add score / hint
 
 
 def diagonal(x_frst, y_frst, x_scnd, y_scnd):
@@ -101,7 +106,7 @@ def diagonal(x_frst, y_frst, x_scnd, y_scnd):
         diag.append("X")
 
     else:
-        print("CHECK DIAGONALSSSSS")
+        print("DEBUG CHECK DIAGONALSSSSS")
         for i in range(1, abs(y_frst - y_scnd), 1):
             if x_frst < x_scnd and y_frst < y_scnd:
                 cell = grid[x_frst + i][y_frst + i]
@@ -171,52 +176,65 @@ def hor_vert(x_coord, y_coord, x_coord1, y_coord1):
     return horvert
 
 
-def is_valid(initial_cell, landing_cell):
+def is_valid(cell_1, cell_2):
     valid = False
-    print("DEBUG checks proximity initial_cell" + str(initial_cell.x_coord) + " " + str(initial_cell.y_coord))
-    print("DEBUG checks proximity landing_cell" + str(landing_cell.x_coord) + " " + str(landing_cell.y_coord))
+    print("DEBUG checks proximity initial_cell" + str(cell_1.x_coord) + " " + str(cell_1.y_coord))
+    print("DEBUG checks proximity landing_cell" + str(cell_2.x_coord) + " " + str(cell_2.y_coord))
     # checks proximity
-    if abs(initial_cell.x_coord - landing_cell.x_coord) == 1 and abs(initial_cell.y_coord - landing_cell.y_coord):
+    if abs(cell_1.x_coord - cell_2.x_coord) == 1 and abs(cell_1.y_coord - cell_2.y_coord) == 1:
         print(" DEBUG diagonal proximity")
         valid = True
-    elif initial_cell.y_coord - landing_cell.y_coord == 0:
-        print(" DEBUG proximity same y " + str(initial_cell.y_coord) + str(landing_cell.y_coord) + " XXX " + str(initial_cell.x_coord) + str(landing_cell.x_coord))
-        if abs(initial_cell.x_coord - landing_cell.x_coord) == 1:
-            print(" DEBUG proximity value x " + str(initial_cell.x_coord) + str(landing_cell.x_coord))
+    elif cell_1.y_coord - cell_2.y_coord == 0:
+        print(" DEBUG proximity same y " + str(cell_1.y_coord) + str(cell_2.y_coord) + " XXX " + str(
+            cell_1.x_coord) + str(cell_2.x_coord))
+        if abs(cell_1.x_coord - cell_2.x_coord) == 1:
+            print(" DEBUG proximity value x " + str(cell_1.x_coord) + str(cell_2.x_coord))
             valid = True
-        elif len(hor_vert(initial_cell.x_coord, initial_cell.y_coord, landing_cell.x_coord, landing_cell.y_coord)) == 0:
+        elif len(hor_vert(cell_1.x_coord, cell_1.y_coord, cell_2.x_coord, cell_2.y_coord)) == 0:
 
             valid = True
-    elif initial_cell.x_coord - landing_cell.x_coord == 0:
-        print(" DEBUG proximity same x " + str(initial_cell.x_coord) + str(landing_cell.x_coord))
-        if abs(initial_cell.y_coord - landing_cell.y_coord) == 1:
-            print(" DEBUG proximity value y " + str(initial_cell.y_coord) + str(landing_cell.y_coord))
+    elif cell_1.x_coord - cell_2.x_coord == 0:
+        print(" DEBUG proximity same x " + str(cell_1.x_coord) + str(cell_2.x_coord))
+        if abs(cell_1.y_coord - cell_2.y_coord) == 1:
+            print(" DEBUG proximity value y " + str(cell_1.y_coord) + str(cell_2.y_coord))
             valid = True
-        elif len(hor_vert(initial_cell.x_coord, initial_cell.y_coord, landing_cell.x_coord, landing_cell.y_coord)) == 0:
+        elif len(hor_vert(cell_1.x_coord, cell_1.y_coord, cell_2.x_coord, cell_2.y_coord)) == 0:
             valid = True
 
     else:
         print(" DEBUG far from each other")
         # checks cells far from each other having just empty cells in between
-        if len(diagonal(initial_cell.x_coord, initial_cell.y_coord, landing_cell.x_coord, landing_cell.y_coord)) == 0:
+        if len(diagonal(cell_1.x_coord, cell_1.y_coord, cell_2.x_coord, cell_2.y_coord)) == 0:
             print(" DEBUG CHECK DIAGONAL")
             valid = True
-
-        '''if len(hor_vert(initial_cell.x_coord, initial_cell.y_coord, landing_cell.x_coord, landing_cell.y_coord)) == 0:
-            print(" DEBUG CHECK HOR VERT")
-            valid = True'''
 
     return valid
 
 
+''' 
+TBD: calculate score 
+- same numbers score 5
+- 10 sums score 10
+sequential scoring has a bonus?
+hints have a malus? 
+'''
+
+
 def score(cell1, cell2):
-    if cell1.value == cell2.value or cell1.value + cell2.value == 10:
+    global score_points
+    score_points = 0
+    if cell1.value == cell2.value:
+        score_points = score_points + 5
+        return True
+
+    elif cell1.value + cell2.value == 10:
+        score_points = score_points + 10
         return True
     else:
         return False
 
 
-clickQueue = queue.Queue()
+clickQueue = queue.Queue()  # keeps clicks state
 
 run = True
 
@@ -232,9 +250,9 @@ while run:
         if event.type == pygame.MOUSEBUTTONDOWN:
 
             pos = pygame.mouse.get_pos()
-            if pos[1] < 500:
+            if pos[1] < 500:  # checks click is in the numbers board
 
-                if clickQueue.qsize() == 0:
+                if clickQueue.qsize() == 0:  # start
 
                     first_cell = get_cord_first_click(math.floor(pos[0] // dif), math.floor(pos[1] // dif))
                     clickQueue.put(first_cell)
@@ -243,7 +261,7 @@ while run:
                     flag1_started = True
 
                 else:
-                    if clickQueue.qsize() == 1:
+                    if clickQueue.qsize() == 1:  # first number selected
 
                         scd_cell = get_cord_second_click(math.floor(pos[0] // dif), math.floor(pos[1] // dif))
                         clickQueue.put(scd_cell)
@@ -251,14 +269,13 @@ while run:
                         grid[scd_cell.x_coord][scd_cell.y_coord] = scd_cell
                         flag2_started = True
 
-                    elif clickQueue.qsize() > 1:
+                    elif clickQueue.qsize() > 1:  # second number selected
 
-                        clickQueue.get()
-                        posCell = [scd_cell.x_coord, scd_cell.y_coord]
-
-                        first_cell = get_cord_first_click(scd_cell.x_coord, scd_cell.y_coord)
+                        clickQueue.get()  # fifo click
+                        first_cell = get_cord_first_click(scd_cell.x_coord,
+                                                          scd_cell.y_coord)  # second click becomes first
                         scd_cell = get_cord_second_click(math.floor(pos[0] // dif), math.floor(pos[1] // dif))
-                        clickQueue.put(scd_cell)
+                        clickQueue.put(scd_cell)  # adds last click
 
                         flag1_started = True
                         flag2_started = True
@@ -266,7 +283,6 @@ while run:
                     if score(first_cell, scd_cell) and is_valid(first_cell, scd_cell):
                         print("SCORE")
 
-                        # check if close and valid
                         first_cell.value = 0
                         scd_cell.value = 0
                         flagPress1 = 1
