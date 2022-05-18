@@ -222,7 +222,7 @@ hints have a malus?
 
 def score(cell1, cell2):
     global score_points
-    score_points = 0
+
     if cell1.value == cell2.value:
         score_points = score_points + 5
         return True
