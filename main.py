@@ -101,7 +101,7 @@ def diagonal(x_frst, y_frst, x_scnd, y_scnd):
         diag.append("X")
 
     else:
-
+        print("CHECK DIAGONALSSSSS")
         for i in range(1, abs(y_frst - y_scnd), 1):
             if x_frst < x_scnd and y_frst < y_scnd:
                 cell = grid[x_frst + i][y_frst + i]
@@ -124,23 +124,88 @@ def diagonal(x_frst, y_frst, x_scnd, y_scnd):
     return diag
 
 
+def hor_vert(x_coord, y_coord, x_coord1, y_coord1):
+    print(" DEBUG CHECK HORVERT INSDE")
+    horvert = []
+    # check horizontal values in a gap
+    if x_coord == x_coord1 and y_coord != y_coord1:
+        print(" DEBUG CHECK VERT gap same x ")
+        for i in range(1, abs(y_coord - y_coord1), 1):
+            if y_coord < y_coord1:
+                cell = grid[x_coord][y_coord + i]
+                print("-----------------------------")
+                print(cell.value)
+                print("-----------------------------")
+            elif y_coord > y_coord1:
+                cell = grid[x_coord][y_coord - i]
+                print("-----------------------------")
+                print(cell.value)
+                print("-----------------------------")
+            else:
+                cell.value = 0
+
+            if cell.value != 0:
+                horvert.append(cell.value)
+        # check vertical values in a gap
+        print(" DEBUG CHECK HOR x gap same y")
+    elif x_coord != x_coord1 and y_coord == y_coord1:
+        # check y gap
+        for i in range(1, abs(x_coord - x_coord1), 1):
+            if x_coord < x_coord1:
+                cell = grid[x_coord + 1][y_coord]
+                print("-----------------------------")
+                print(cell.value)
+                print("-----------------------------")
+            elif x_coord > x_coord1:
+                cell = grid[x_coord - 1][y_coord]
+                print("-----------------------------")
+                print(cell.value)
+                print("-----------------------------")
+
+            else:
+                cell.value = 0
+
+            if cell.value != 0:
+                horvert.append(cell.value)
+
+    return horvert
+
+
 def is_valid(initial_cell, landing_cell):
     valid = False
+    print("DEBUG checks proximity initial_cell" + str(initial_cell.x_coord) + " " + str(initial_cell.y_coord))
+    print("DEBUG checks proximity landing_cell" + str(landing_cell.x_coord) + " " + str(landing_cell.y_coord))
     # checks proximity
-    if initial_cell.y_coord - landing_cell.y_coord == 0:
+    if abs(initial_cell.x_coord - landing_cell.x_coord) == 1 and abs(initial_cell.y_coord - landing_cell.y_coord):
+        print(" DEBUG diagonal proximity")
+        valid = True
+    elif initial_cell.y_coord - landing_cell.y_coord == 0:
+        print(" DEBUG proximity same y " + str(initial_cell.y_coord) + str(landing_cell.y_coord) + " XXX " + str(initial_cell.x_coord) + str(landing_cell.x_coord))
         if abs(initial_cell.x_coord - landing_cell.x_coord) == 1:
-            # print("DEBUG)
-            # print(initial_cell.x_coord - landing_cell.x_coord)
+            print(" DEBUG proximity value x " + str(initial_cell.x_coord) + str(landing_cell.x_coord))
+            valid = True
+        elif len(hor_vert(initial_cell.x_coord, initial_cell.y_coord, landing_cell.x_coord, landing_cell.y_coord)) == 0:
+
             valid = True
     elif initial_cell.x_coord - landing_cell.x_coord == 0:
+        print(" DEBUG proximity same x " + str(initial_cell.x_coord) + str(landing_cell.x_coord))
         if abs(initial_cell.y_coord - landing_cell.y_coord) == 1:
-            # print("DEBUG)
-            # print(initial_cell.y_coord - landing_cell.y_coord)
+            print(" DEBUG proximity value y " + str(initial_cell.y_coord) + str(landing_cell.y_coord))
             valid = True
+        elif len(hor_vert(initial_cell.x_coord, initial_cell.y_coord, landing_cell.x_coord, landing_cell.y_coord)) == 0:
+            valid = True
+
     else:
+        print(" DEBUG far from each other")
         # checks cells far from each other having just empty cells in between
         if len(diagonal(initial_cell.x_coord, initial_cell.y_coord, landing_cell.x_coord, landing_cell.y_coord)) == 0:
+            print(" DEBUG CHECK DIAGONAL")
             valid = True
+
+        '''if len(hor_vert(initial_cell.x_coord, initial_cell.y_coord, landing_cell.x_coord, landing_cell.y_coord)) == 0:
+            print(" DEBUG CHECK HOR VERT")
+            valid = True'''
+
     return valid
 
 
@@ -176,6 +241,7 @@ while run:
                     grid[first_cell.x_coord][first_cell.y_coord] = first_cell
 
                     flag1_started = True
+
                 else:
                     if clickQueue.qsize() == 1:
 
@@ -198,15 +264,16 @@ while run:
                         flag2_started = True
 
                     if score(first_cell, scd_cell) and is_valid(first_cell, scd_cell):
+                        print("SCORE")
 
                         # check if close and valid
                         first_cell.value = 0
                         scd_cell.value = 0
                         flagPress1 = 1
                         flagPress2 = 0
+
                     else:
                         print("NO SCORE")
-
             else:
                 print("TBI SOON: HINT/SCORE")
 
