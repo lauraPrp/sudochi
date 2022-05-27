@@ -71,16 +71,16 @@ def draw():
         for j in range(9):
 
             pygame.draw.rect(screen, WHITE, (i * dif, j * dif, dif + 1, dif + 1))
-            # ic(gridArr)
+
             if gridArr[i][j] != 0:
                 text1 = font1.render(str(np.floor(gridArr[i][j]).astype(np.int32)), 1, BLACK)
                 screen.blit(text1, (i * dif + 10, j * dif + 10))
-                # Draw lines to form grid'''
+                # Draw lines to form grid
     for i in range(10):
         thick = 1
-        # horiz
+        # horiz lines
         pygame.draw.line(screen, BLACK, (0, i * dif), (500, i * dif), thick)
-        # vertical
+        # vertical lines
         pygame.draw.line(screen, BLACK, (i * dif, 0), (i * dif, 500), thick)
 
 
@@ -97,7 +97,7 @@ def diagonal(x_frst, y_frst, x_scnd, y_scnd):
     diag = []
 
     if abs(x_frst - x_scnd) != abs(y_frst - y_scnd):
-        ic("ERROR this is not a diagonal")
+        ic("this is not a diagonal")
         flag1_started = False
         flag2_started = False
         diag.append("X")
@@ -137,17 +137,22 @@ def hor_vert(x3, y3, x2, y2):
 
     if horizontal == 0:
         for cc in np.round(np.linspace(y3, y2, count)).astype(np.int32):
-            ic(cc, count)
+            ic(numpy_grid[cc][y2])
             middleNumbers.append(numpy_grid[x2][cc])
 
     if vertical == 0:
         for cc in np.round(np.linspace(x3, x2, count)).astype(np.int32):
-            ic(numpy_grid[cc][y2])
+            ic(numpy_grid[y2][cc])
             middleNumbers.append(numpy_grid[cc][y2])
 
-    if np.sum(middleNumbers).astype(int) == (numpy_grid[y3, x3] + numpy_grid[x2, y2]):
+    if np.sum(middleNumbers).astype(int) == numpy_grid[x3, y3] + numpy_grid[x2, y2]:
+
+        ic(numpy_grid[y3, x3])
+        ic(numpy_grid[x2, y2])
+
         return 0
     else:
+        ic(np.sum(middleNumbers).astype(int))
         return np.sum(middleNumbers).astype(int)
 
 
@@ -155,7 +160,7 @@ def is_valid(cell_1, cell_2):
     valid = False
     ic("DEBUG checks proximity initial_cell" + str(cell_1.x_coord) + " " + str(cell_1.y_coord))
     ic("DEBUG checks proximity landing_cell" + str(cell_2.x_coord) + " " + str(cell_2.y_coord))
-    # Check there are 2 different cells
+    # Check they are 2 different cells
     if cell_1.x_coord == cell_2.x_coord and cell_1.y_coord == cell_2.y_coord:
         return False
     # checks proximity
@@ -163,21 +168,20 @@ def is_valid(cell_1, cell_2):
         ic(" DEBUG diagonal proximity")
         valid = True
     elif cell_1.y_coord - cell_2.y_coord == 0:
-        ic(" DEBUG proximity same y " + str(cell_1.y_coord) + str(cell_2.y_coord))
-        ic("XXX " + str(cell_1.x_coord) + str(cell_2.x_coord))
-        if abs(cell_1.x_coord - cell_2.x_coord) == 1:
 
+        if abs(cell_1.x_coord - cell_2.x_coord) == 1:
+            ic(" DEBUG proximity same y ")
             valid = True
         elif hor_vert(cell_1.x_coord, cell_1.y_coord, cell_2.x_coord, cell_2.y_coord) < 1:
+            ic(" DEBUG same line vert y " )
             valid = True
     elif cell_1.x_coord - cell_2.x_coord == 0:
 
         if abs(cell_1.y_coord - cell_2.y_coord) == 1:
-
+            ic(" DEBUG proximity same x ")
             valid = True
         elif hor_vert(cell_1.x_coord, cell_1.y_coord, cell_2.x_coord, cell_2.y_coord) < 1:
-
-            ic(hor_vert(cell_1.x_coord, cell_1.y_coord, cell_2.x_coord, cell_2.y_coord))
+            ic(" DEBUG same line hor x " )
             valid = True
 
     else:
@@ -201,16 +205,19 @@ hints have a malus?
 
 def score(cell1, cell2):
     global score_points
-
-    if cell1.value == cell2.value:
-        score_points = score_points + 5
-        return True
-
-    elif cell1.value + cell2.value == 10:
-        score_points = score_points + 10
-        return True
-    else:
+    if cell1.value == 0 or cell2.value == 0:
+        ic("nice trail crocodile")
         return False
+    else:
+        if cell1.value == cell2.value:
+            score_points = score_points + 5
+            return True
+
+        elif cell1.value + cell2.value == 10:
+            score_points = score_points + 10
+            return True
+        else:
+            return False
 
 
 clickQueue = queue.Queue()  # keeps clicks state
