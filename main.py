@@ -3,8 +3,11 @@ import sys
 
 import pygame
 import math
+import numpy as np
 
 import grid
+from Cell import Cell
+from icecream import ic
 
 pygame.font.init()
 screen = pygame.display.set_mode((500, 600))
@@ -17,7 +20,7 @@ dif = 500 / 9
 flag1_started = False
 flag2_started = False
 
-grid = grid.create_grid()
+grid = list(grid.create_grid())
 # Load test fonts for future use
 font1 = pygame.font.SysFont("verdana", 30)
 font2 = pygame.font.SysFont("verdana", 10)
@@ -32,11 +35,7 @@ def get_cord_first_click(xx, yy):
     global x, y
     x = xx
     y = yy
-    # position
-
-    # values
-    cell = grid[x][y]
-    print(cell.value)
+    cell = Cell(xx, yy, grid[x][y], WHITE, True)
 
     return cell
 
@@ -46,8 +45,7 @@ def get_cord_second_click(xx1, yy1):
     x1 = xx1
     y1 = yy1
     # values
-    cell = grid[x1][y1]
-    print("DEBUG" + str(cell.value))
+    cell = Cell(x1, y1, grid[x1][y1], WHITE, True)
 
     return cell
 
@@ -67,18 +65,17 @@ def highlight_cells():
 
 def draw():
     # Draw the lines on the board
+    gridArr = list(grid)
+
     for i in range(9):
         for j in range(9):
-            cell = grid[i][j]
-            if cell.value == 0:
-                # Fill blue color in already numbered grid
-                pygame.draw.rect(screen, WHITE, (i * dif, j * dif, dif + 1, dif + 1))
 
-            else:
-                pygame.draw.rect(screen, WHITE, (i * dif, j * dif, dif + 1, dif + 1))
-                text1 = font1.render(str(cell.value), 1, BLACK)
+            pygame.draw.rect(screen, WHITE, (i * dif, j * dif, dif + 1, dif + 1))
+            # ic(gridArr)
+            if gridArr[i][j] != 0:
+                text1 = font1.render(str(np.floor(gridArr[i][j]).astype(np.int32)), 1, BLACK)
                 screen.blit(text1, (i * dif + 10, j * dif + 10))
-                # Draw lines to form grid
+                # Draw lines to form grid'''
     for i in range(10):
         thick = 1
         # horiz
@@ -100,13 +97,12 @@ def diagonal(x_frst, y_frst, x_scnd, y_scnd):
     diag = []
 
     if abs(x_frst - x_scnd) != abs(y_frst - y_scnd):
-        print("ERROR this is not a diagonal")
+        ic("ERROR this is not a diagonal")
         flag1_started = False
         flag2_started = False
         diag.append("X")
 
     else:
-        print("DEBUG CHECK DIAGONALSSSSS")
         for i in range(1, abs(y_frst - y_scnd), 1):
             if x_frst < x_scnd and y_frst < y_scnd:
                 cell = grid[x_frst + i][y_frst + i]
@@ -121,96 +117,79 @@ def diagonal(x_frst, y_frst, x_scnd, y_scnd):
                 cell = grid[x_frst - i][y_frst - i]
 
             else:
-                cell.value = 0
+                cell = 0
 
-            if cell.value != 0:
-                diag.append(cell.value)
+            if cell != 0:
+                ic(cell)
+                diag.append(cell)
 
     return diag
 
 
-def hor_vert(x_coord, y_coord, x_coord1, y_coord1):
-    print(" DEBUG CHECK HORVERT INSDE")
-    horvert = []
-    # check horizontal values in a gap
-    if x_coord == x_coord1 and y_coord != y_coord1:
-        print(" DEBUG CHECK VERT gap same x ")
-        for i in range(1, abs(y_coord - y_coord1), 1):
-            if y_coord < y_coord1:
-                cell = grid[x_coord][y_coord + i]
-                print("-----------------------------")
-                print(cell.value)
-                print("-----------------------------")
-            elif y_coord > y_coord1:
-                cell = grid[x_coord][y_coord - i]
-                print("-----------------------------")
-                print(cell.value)
-                print("-----------------------------")
-            else:
-                cell.value = 0
+def hor_vert(x3, y3, x2, y2):
+    ic()
+    middleNumbers = []
+    numpy_grid = np.array(grid)
+    horizontal = x2 - x3
+    vertical = y2 - y3
 
-            if cell.value != 0:
-                horvert.append(cell.value)
-        # check vertical values in a gap
-        print(" DEBUG CHECK HOR x gap same y")
-    elif x_coord != x_coord1 and y_coord == y_coord1:
-        # check y gap
-        for i in range(1, abs(x_coord - x_coord1), 1):
-            if x_coord < x_coord1:
-                cell = grid[x_coord + 1][y_coord]
-                print("-----------------------------")
-                print(cell.value)
-                print("-----------------------------")
-            elif x_coord > x_coord1:
-                cell = grid[x_coord - 1][y_coord]
-                print("-----------------------------")
-                print(cell.value)
-                print("-----------------------------")
+    count = max(abs(vertical + 1), abs(horizontal + 1))
 
-            else:
-                cell.value = 0
+    if horizontal == 0:
+        for cc in np.round(np.linspace(y3, y2, count)).astype(np.int32):
+            ic(cc, count)
+            middleNumbers.append(numpy_grid[x2][cc])
 
-            if cell.value != 0:
-                horvert.append(cell.value)
+    if vertical == 0:
+        for cc in np.round(np.linspace(x3, x2, count)).astype(np.int32):
+            ic(numpy_grid[cc][y2])
+            middleNumbers.append(numpy_grid[cc][y2])
 
-    return horvert
+    if np.sum(middleNumbers).astype(int) == (numpy_grid[y3, x3] + numpy_grid[x2, y2]):
+        return 0
+    else:
+        return np.sum(middleNumbers).astype(int)
 
 
 def is_valid(cell_1, cell_2):
     valid = False
-    print("DEBUG checks proximity initial_cell" + str(cell_1.x_coord) + " " + str(cell_1.y_coord))
-    print("DEBUG checks proximity landing_cell" + str(cell_2.x_coord) + " " + str(cell_2.y_coord))
+    ic("DEBUG checks proximity initial_cell" + str(cell_1.x_coord) + " " + str(cell_1.y_coord))
+    ic("DEBUG checks proximity landing_cell" + str(cell_2.x_coord) + " " + str(cell_2.y_coord))
+    # Check there are 2 different cells
+    if cell_1.x_coord == cell_2.x_coord and cell_1.y_coord == cell_2.y_coord:
+        return False
     # checks proximity
     if abs(cell_1.x_coord - cell_2.x_coord) == 1 and abs(cell_1.y_coord - cell_2.y_coord) == 1:
-        print(" DEBUG diagonal proximity")
+        ic(" DEBUG diagonal proximity")
         valid = True
     elif cell_1.y_coord - cell_2.y_coord == 0:
-        print(" DEBUG proximity same y " + str(cell_1.y_coord) + str(cell_2.y_coord) + " XXX " + str(
-            cell_1.x_coord) + str(cell_2.x_coord))
+        ic(" DEBUG proximity same y " + str(cell_1.y_coord) + str(cell_2.y_coord))
+        ic("XXX " + str(cell_1.x_coord) + str(cell_2.x_coord))
         if abs(cell_1.x_coord - cell_2.x_coord) == 1:
-            print(" DEBUG proximity value x " + str(cell_1.x_coord) + str(cell_2.x_coord))
-            valid = True
-        elif len(hor_vert(cell_1.x_coord, cell_1.y_coord, cell_2.x_coord, cell_2.y_coord)) == 0:
 
             valid = True
-    elif cell_1.x_coord - cell_2.x_coord == 0:
-        print(" DEBUG proximity same x " + str(cell_1.x_coord) + str(cell_2.x_coord))
-        if abs(cell_1.y_coord - cell_2.y_coord) == 1:
-            print(" DEBUG proximity value y " + str(cell_1.y_coord) + str(cell_2.y_coord))
+        elif hor_vert(cell_1.x_coord, cell_1.y_coord, cell_2.x_coord, cell_2.y_coord) < 1:
             valid = True
-        elif len(hor_vert(cell_1.x_coord, cell_1.y_coord, cell_2.x_coord, cell_2.y_coord)) == 0:
+    elif cell_1.x_coord - cell_2.x_coord == 0:
+
+        if abs(cell_1.y_coord - cell_2.y_coord) == 1:
+
+            valid = True
+        elif hor_vert(cell_1.x_coord, cell_1.y_coord, cell_2.x_coord, cell_2.y_coord) < 1:
+
+            ic(hor_vert(cell_1.x_coord, cell_1.y_coord, cell_2.x_coord, cell_2.y_coord))
             valid = True
 
     else:
-        print(" DEBUG far from each other")
+
         # checks cells far from each other having just empty cells in between
-        if len(diagonal(cell_1.x_coord, cell_1.y_coord, cell_2.x_coord, cell_2.y_coord)) == 0:
-            print(" DEBUG CHECK DIAGONAL")
+        if len(diagonal(cell_1.x_coord, cell_1.y_coord, cell_2.x_coord, cell_2.y_coord)) < 1:
             valid = True
 
     return valid
 
 
+# shuffle
 ''' 
 TBD: calculate score 
 - same numbers score 5
@@ -256,7 +235,7 @@ while run:
 
                     first_cell = get_cord_first_click(math.floor(pos[0] // dif), math.floor(pos[1] // dif))
                     clickQueue.put(first_cell)
-                    grid[first_cell.x_coord][first_cell.y_coord] = first_cell
+                    # grid[first_cell.x_coord][first_cell.y_coord] = first_cell
 
                     flag1_started = True
 
@@ -265,8 +244,8 @@ while run:
 
                         scd_cell = get_cord_second_click(math.floor(pos[0] // dif), math.floor(pos[1] // dif))
                         clickQueue.put(scd_cell)
-                        grid[first_cell.x_coord][first_cell.y_coord] = first_cell
-                        grid[scd_cell.x_coord][scd_cell.y_coord] = scd_cell
+                        # grid[first_cell.x_coord][first_cell.y_coord] = first_cell
+                        # grid[scd_cell.x_coord][scd_cell.y_coord] = scd_cell
                         flag2_started = True
 
                     elif clickQueue.qsize() > 1:  # second number selected
@@ -280,18 +259,19 @@ while run:
                         flag1_started = True
                         flag2_started = True
 
-                    if score(first_cell, scd_cell) and is_valid(first_cell, scd_cell):
-                        print("SCORE")
+                    if is_valid(first_cell, scd_cell) and score(first_cell, scd_cell):
+                        ic("SCORE")
 
-                        first_cell.value = 0
-                        scd_cell.value = 0
+                        grid[first_cell.x_coord][first_cell.y_coord] = 0
+                        grid[scd_cell.x_coord][scd_cell.y_coord] = 0
+
                         flagPress1 = 1
                         flagPress2 = 0
 
                     else:
-                        print("NO SCORE")
+                        ic("NO SCORE")
             else:
-                print("TBI SOON: HINT/SCORE")
+                ic("TBI SOON: HINT/SCORE")
 
     draw()
     instruction()
